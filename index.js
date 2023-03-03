@@ -6,6 +6,7 @@ import { checkAuth, handlerValidateErrors } from "./utils/index.js"
 import { UserController, PostController, TagsController } from "./controllers/index.js"
 import { postCreateValidation } from "./validations/post.js";
 import cors from 'cors'
+import fs from 'fs'
 
 const dbName = 'blog'
 
@@ -18,6 +19,9 @@ const app = express()
 
 const storage = multer.diskStorage({
   destination: (_, __, cb) => {
+    if(!fs.existsSync('uploads')) {
+      fs.mkdirSync('uploads')
+    }
     cb(null, 'uploads')
   },
   filename: (_, file, cb) => {
