@@ -3,10 +3,9 @@ import multer from 'multer'
 import mongoose from "mongoose";
 import {registerValidation, loginValidation} from './validations/auth.js'
 import { checkAuth, handlerValidateErrors } from "./utils/index.js"
-import { UserController, PostController } from "./controllers/index.js"
+import { UserController, PostController, TagsController } from "./controllers/index.js"
 import { postCreateValidation } from "./validations/post.js";
-import * as fs from "fs";
-
+import cors from 'cors'
 
 const dbName = 'blog'
 
@@ -29,6 +28,7 @@ const storage = multer.diskStorage({
 const upload = multer({storage})
 
 app.use(express.json())
+app.use(cors())
 app.use('/uploads', express.static('uploads'))
 
 app.post('/auth/register', registerValidation, handlerValidateErrors, UserController.register)
@@ -36,10 +36,17 @@ app.post('/auth/login', loginValidation, handlerValidateErrors, UserController.l
 app.get('/auth/me', checkAuth, UserController.getMe)
 
 app.get('/posts', PostController.getAll)
+app.get('/posts/popular', PostController.getPopular)
+app.get('/posts/tags', PostController.getLastTags)
 app.get('/posts/:id', PostController.getOne)
 app.post('/posts', checkAuth, postCreateValidation, PostController.create)
 app.delete('/posts/:id', checkAuth, PostController.remove)
 app.patch('/posts/:id', checkAuth, postCreateValidation, PostController.update)
+
+app.patch('/posts/:id/comment', checkAuth, PostController.addComment)
+// app.delete('/posts/:id/comment', checkAuth, PostController.removeComment)
+
+app.get('/tags/:tagsName', TagsController.getPostsOnTag)
 
 app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
   res.json({
