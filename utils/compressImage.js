@@ -3,23 +3,24 @@ import sharp from 'sharp'
 
 export default async (req, res, next) => {
   try {
-    const { path, destination, filename, mimetype } = req.file
+    const { path, fieldname, destination, mimetype } = req.file
+    const uniqueId = fieldname + '-' + Date.now()+'.'+mimetype.split('/')[1]
+    const newPath = `${destination}/${uniqueId}`
 
-    const newName = `${destination}/${filename}_clone.${mimetype.split('/')[1]}`
+    await sharp(path)
+      .jpeg({ progressive: true, force: false })
+      .png({ progressive: true, force: false })
+      .resize({ width: 300, height: 300})
+      .toFile(newPath)
 
-    const data = await sharp(path)
-      .jpeg({
-        quality: 100,
-        chromaSubsampling: '4:4:4'
-      })
-      .resize({ width: 350, height: 350})
-      .toFile(newName)
+    req.file.optimizedImage = newPath
 
-    fs.unlinkSync(path);
+    fs.unlinkSync(path)
+
     next();
   } catch (e) {
     return res.status(403).json({
-      message: "Нет доступа"
+      message: "Нет доступа " + e
     })
   }
 }

@@ -18,8 +18,6 @@ mongoose.connect(
 
 const app = express()
 
-let uniqueName;
-
 const storage = multer.diskStorage({
   destination: (_, __, cb) => {
     if(!fs.existsSync('uploads')) {
@@ -28,8 +26,7 @@ const storage = multer.diskStorage({
     cb(null, 'uploads')
   },
   filename: function (req, file, cb) {
-    uniqueName = file.fieldname + '-' + Date.now()+'.'+file.mimetype.split('/')[1]
-    cb(null, uniqueName);
+    cb(null, file.originalname);
   }
 })
 
@@ -71,8 +68,9 @@ app.patch('/posts/:id/comment', checkAuth, PostController.addComment)
 app.get('/tags/:tagsName', TagsController.getPostsOnTag)
 
 app.post('/upload', checkAuth, upload.single('image'), compressImage, (req, res) => {
+  const image = req.file.optimizedImage || req.file.originalname
   res.json({
-    url: `uploads/${uniqueName}`
+    url: `uploads/${image}`
   })
 })
 
