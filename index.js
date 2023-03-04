@@ -7,6 +7,7 @@ import { UserController, PostController, TagsController } from "./controllers/in
 import { postCreateValidation } from "./validations/post.js";
 import cors from 'cors'
 import fs from 'fs'
+import compressImage from "./utils/compressImage.js";
 
 const dbName = 'blog'
 
@@ -17,6 +18,8 @@ mongoose.connect(
 
 const app = express()
 
+let uniqueName;
+
 const storage = multer.diskStorage({
   destination: (_, __, cb) => {
     if(!fs.existsSync('uploads')) {
@@ -24,12 +27,27 @@ const storage = multer.diskStorage({
     }
     cb(null, 'uploads')
   },
-  filename: (_, file, cb) => {
-    cb(null, file.originalname)
-  },
+  filename: function (req, file, cb) {
+    uniqueName = file.fieldname + '-' + Date.now()+'.'+file.mimetype.split('/')[1]
+    cb(null, uniqueName);
+  }
 })
 
-const upload = multer({storage})
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+}
+
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 1024 * 1024 * 5
+  },
+  fileFilter: fileFilter
+})
 
 app.use(express.json())
 app.use(cors())
@@ -52,9 +70,9 @@ app.patch('/posts/:id/comment', checkAuth, PostController.addComment)
 
 app.get('/tags/:tagsName', TagsController.getPostsOnTag)
 
-app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
+app.post('/upload', checkAuth, upload.single('image'), compressImage, (req, res) => {
   res.json({
-    url: `uploads/${req.file.originalname}`
+    url: `uploads/${uniqueName}`
   })
 })
 
