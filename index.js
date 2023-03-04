@@ -70,7 +70,7 @@ app.get('/tags/:tagsName', TagsController.getPostsOnTag)
 app.post('/upload', checkAuth, upload.single('image'), compressImage, (req, res) => {
   const image = req.file.optimizedImage || req.file.originalname
   res.json({
-    url: `uploads/${image}`
+    url: image
   })
 })
 
