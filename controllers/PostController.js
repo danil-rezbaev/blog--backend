@@ -28,7 +28,7 @@ export const getAll = async (req, res) => {
     const findFile = await PostModel
       .find()
       .sort({createdAt: -1})
-      .populate({ path: "user", select: ["nickname", "avatar"] })
+      .populate({ path: "user", select: ["username", "avatar"] })
       .exec()
 
     if(findFile) {
@@ -51,7 +51,7 @@ export const getPopular = async (req, res) => {
     const findFile = await PostModel
       .find()
       .sort({viewsCount: -1})
-      .populate({ path: "user", select: ["nickname", "avatar"] })
+      .populate({ path: "user", select: ["username", "avatar"] })
       .exec()
 
     if(findFile) {
@@ -92,7 +92,7 @@ export const getOne = async (req, res) => {
       }
 
       res.json(doc)
-    }).populate({ path: "user", select: ["nickname", "avatar"] })
+    }).populate({ path: "user", select: ["username", "avatar"] })
   } catch (err) {
     console.log(err);
     res.status(500).json({

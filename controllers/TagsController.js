@@ -7,7 +7,7 @@ export const getPostsOnTag = async (req, res) => {
     const findFile = await PostModel
       .find({tags: {$all: [tagName]}})
       .sort({createdAt: -1})
-      .populate({ path: "user", select: ["nickname", "avatar"] })
+      .populate({ path: "user", select: ["username", "avatar"] })
       .exec()
 
     if(findFile) {
