@@ -81,7 +81,7 @@ app.post('/upload', checkAuth, upload.single('image'), compressImage, (req, res)
 //   res.send(fileContent)
 // })
 
-app.listen(443, (err) => {
+app.listen(4444, (err) => {
   if(err) {
     console.log('error')
   }
